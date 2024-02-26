@@ -1,0 +1,19 @@
+{
+    "BagIt-Payload-Profile-Info": {
+        "Source-Organization": "LZV.NRW",
+        "External-Description": "BagIt Payload Profile for Consistent Deposit to DCM",
+        "Contact-Name": "Michael Rahier",
+        "BagIt-Payload-Profile-Identifier": "https://www.git.uni-muenster.de/123/dcm-bag-payload-v0.2.0.json",
+        "Version": "0.3.2"
+    },
+    "Payload-Folders-Required": [
+        "preservation_master"
+    ],
+    "Payload-Folders-Allowed": [
+        "preservation_master", {
+            "regex": "modified_master\/\\d+"
+        }, {
+            "regex": "derivative_copy\/\\d+"
+        }
+    ]
+}
