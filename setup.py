@@ -1,10 +1,12 @@
 from setuptools import setup
 
 setup(
-    version="4.0.0",
+    version="4.0.1",
     name="dcm-object-validator",
-    description="flask app for object-validator-containers",
+    description="flask app implementing the DCM Object Validator API",
     author="LZV.nrw",
+    license="MIT",
+    python_requires=">=3.10",
     install_requires=[
         "flask==3.*",
         "PyYAML==6.*",
