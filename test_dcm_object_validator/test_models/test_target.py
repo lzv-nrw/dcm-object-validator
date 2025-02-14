@@ -1,4 +1,4 @@
-"""IP-data model test-module."""
+"""Test module for the `Target` data model."""
 
 from pathlib import Path
 

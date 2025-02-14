@@ -1,98 +1,47 @@
 """Input handlers for the 'DCM Object Validator'-app."""
 
+from typing import Mapping
 from pathlib import Path
 
-from data_plumber_http import Property, Object, String, Url, Array
-from dcm_common.services.handlers import TargetPath
+from data_plumber_http import Property, Object, Url
+from dcm_common.services.handlers import TargetPath, PluginType
 
-from dcm_object_validator.models import Target
+from dcm_object_validator.models import ValidationConfig, Target
+from dcm_object_validator.plugins.validation import ValidationPlugin
 
 
-def get_validate_object_handler(cwd: Path, default_modules: list[str]):
+def get_validate_handler(
+    cwd: Path, acceptable_plugins: Mapping[str, ValidationPlugin]
+):
     """
-    Returns parameterized handler (based on cwd and default modules
-    from app_config)
-    """
-    return Object(
-        properties={
-            Property("validation", required=True): Object(
-                properties={
-                    Property("target", required=True): Object(
-                        model=Target,
-                        properties={
-                            Property("path", required=True):
-                                TargetPath(
-                                    _relative_to=cwd, cwd=cwd, is_file=True
-                                )
-                        },
-                        accept_only=["path"]
-                    ),
-                    Property("modules", default=default_modules):
-                        Array(items=String()),
-                    Property("args"): Object(
-                        properties={
-                            Property("file_integrity"): Object(
-                                properties={
-                                    Property("method"): String(
-                                        enum=["md5", "sha1", "sha256", "sha512"]
-                                    ),
-                                    Property("value"): String()
-                                },
-                                accept_only=["method", "value"]
-                            )
-                        },
-                        accept_only=["file_integrity"]
-                    ),
-                },
-                accept_only=["target", "modules", "args"]
-            ),
-            Property("callbackUrl", name="callback_url"):
-                Url(schemes=["http", "https"])
-        },
-        accept_only=["validation", "callbackUrl"]
-    ).assemble()
-
-
-def get_validate_ip_handler(cwd: Path, default_modules: list[str]):
-    """
-    Returns parameterized handler (based on cwd and default modules
-    from app_config)
+    Returns parameterized handler (based on cwd and acceptable_plugins)
     """
     return Object(
         properties={
             Property("validation", required=True): Object(
+                model=ValidationConfig,
                 properties={
                     Property("target", required=True): Object(
                         model=Target,
                         properties={
-                            Property("path", required=True):
-                                TargetPath(
-                                    _relative_to=cwd, cwd=cwd, is_dir=True
-                                )
-                        },
-                        accept_only=["path"]
-                    ),
-                    Property("modules", default=default_modules):
-                        Array(items=String()),
-                    Property("args"): Object(
-                        properties={
-                            Property("payload_structure"): Object(
-                                properties={
-                                    Property(
-                                        "profileUrl",
-                                        name="payload_profile_url"
-                                    ): Url(),
-                                },
-                                accept_only=["profileUrl"]
+                            Property("path", required=True): TargetPath(
+                                _relative_to=cwd, cwd=cwd, exists=True
                             )
                         },
-                        accept_only=["payload_structure"]
+                        accept_only=["path"],
+                    ),
+                    Property("plugins", default=lambda **kwargs: {}): Object(
+                        additional_properties=PluginType(
+                            acceptable_plugins,
+                            acceptable_context=["validation"],
+                        )
                     ),
                 },
-                accept_only=["target", "modules", "args"]
+                accept_only=["target", "plugins"],
             ),
-            Property("callbackUrl", name="callback_url"):
-                Url(schemes=["http", "https"])
+            Property("callbackUrl", name="callback_url"): Url(
+                schemes=["http", "https"]
+            ),
         },
-        accept_only=["validation", "callbackUrl"]
+        accept_only=["validation", "callbackUrl"],
     ).assemble()

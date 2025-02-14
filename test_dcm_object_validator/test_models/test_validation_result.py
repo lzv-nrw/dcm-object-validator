@@ -1,46 +1,55 @@
-"""ValidationResult-data model test-module."""
+"""Test module for the `ValidationConfig` data model."""
 
-from dcm_common import Logger
+from pathlib import Path
+
 from dcm_common.models.data_model import get_model_serialization_test
 
-from dcm_object_validator.models.validation_result \
-    import ValidationModuleResult, ValidationResult
-
-
-test_validationmoduleresult_json = get_model_serialization_test(
-    ValidationModuleResult, (
-        ((True, Logger()), {}),
-    )
+from dcm_object_validator.models import ValidationResult
+from dcm_object_validator.plugins.validation.interface import (
+    ValidationPluginResult,
+    ValidationPluginResultPart,
 )
 
 
-test_validationresult_json = get_model_serialization_test(
-    ValidationResult, (
+test_validation_plugin_result_part_json = get_model_serialization_test(
+    ValidationPluginResultPart,
+    (
+        ((), {"path": Path(".")}),
+        (
+            (),
+            {"success": True, "valid": True, "path": Path(".")},
+        ),
+    ),
+)
+
+
+test_validation_plugin_result_json = get_model_serialization_test(
+    ValidationPluginResult,
+    (
         ((), {}),
-        ((True, {"a": ValidationModuleResult(True, Logger())}), {}),
-    )
+        (
+            (),
+            {
+                "success": True,
+                "valid": True,
+                "records": {"0": ValidationPluginResultPart(path=Path("."))},
+            },
+        ),
+    ),
 )
 
 
-def test_validationresult_register_module():
-    """Test method `register_module` of model `ValidationResult`."""
-
-    result = ValidationResult()
-
-    assert result.valid is None
-
-    result.register_module(
-        "module", True, Logger()
-    )
-    result.eval()
-
-    assert result.valid
-
-    result.register_module(
-        "module2", False, Logger()
-    )
-    result.eval()
-
-    assert not result.valid
-
-    assert isinstance(result.details, dict)
+test_validation_result_json = get_model_serialization_test(
+    ValidationResult,
+    (
+        ((), {}),
+        (
+            (),
+            {
+                "success": True,
+                "valid": True,
+                "details": {"0": ValidationPluginResult()},
+            },
+        ),
+    ),
+)

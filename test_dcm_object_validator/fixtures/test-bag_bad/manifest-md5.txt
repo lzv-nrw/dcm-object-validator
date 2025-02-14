@@ -1,2 +1,0 @@
-de876d86742d1e1a744f76c1d453abdb  data/preservation_master/sample.jpg
-4704f491284ef30c0838a94cdd3a2474  data/preservation_master/sample.tiff

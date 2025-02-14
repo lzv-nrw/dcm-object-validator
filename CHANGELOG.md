@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.0.0] - 2025-02-14
+
+### Changed
+
+- Dockerfile: switched to non root-user, pinned JHOVE version, and added checksum validation for JHOVE
+- migrated to API v5
+
+### Added
+
+- added (JHOVE-based) plugin for file format-validation in BagIt-format
+- added support for importing external plugins
+- added plugin for file integrity-validation using the BagIt-format
+- added plugin for file integrity-validation
+- added (JHOVE-based) plugin for file format-validation
+- added validation-plugin interface and related definitions
+- added (fido-based) format identification plugins
+
+### Removed
+
+- removed docker compose file
+- removed `dcm-bag-validator` dependency
+
 ## [4.0.1] - 2024-11-21
 
 ### Changed
