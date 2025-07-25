@@ -7,7 +7,6 @@
 |opf-fido (python library) | Apache 2.0 | Format Identification for Digital Objects (fido), [GitHub](https://github.com/openpreserve/fido) |
 |JHOVE (java application)|GNU Lesser General Public License (LGPL)|JSTOR/Harvard Object Validation Environment, [GitHub](https://github.com/openpreserve/jhove)|
 |pytest (python library) | MIT License | (dev) test framework, [GitHub](https://github.com/pytest-dev/pytest) |
-|pytest-cov (python library) | MIT License | (dev) coverage-plugin for pytest, [GitHub](https://github.com/pytest-dev/pytest-cov) |
 |dcm-common (python library) | MIT License | DCM common code-package, [GitHub](https://github.com/lzv-nrw/dcm-common) |
 |dcm-object-validator-api (python library) | MIT License | DCM Object Validator API-package, [GitHub](https://github.com/lzv-nrw/dcm-object-validator-api) |
 |dcm-object-validator-sdk (python library) | MIT License | (dev) DCM Object Validator SDK-package, [GitHub](https://github.com/lzv-nrw/dcm-object-validator-api) |
