@@ -22,6 +22,18 @@ def _file_storage():
     return Path("test_dcm_object_validator/file_storage")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def disable_extension_logging():
+    """
+    Disables the stderr-logging via the helper method `print_status`
+    of the `dcm_common.services.extensions`-subpackage.
+    """
+    # pylint: disable=import-outside-toplevel
+    from dcm_common.services.extensions.common import PrintStatusSettings
+
+    PrintStatusSettings.silent = True
+
+
 @pytest.fixture(name="object_good")
 def _object_good():
     """File that is expected to be valid."""

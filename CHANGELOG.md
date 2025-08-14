@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.1.0] - 2025-08-14
+
+### Changed
+
+- migrated to new extension system
+
 ## [5.0.1] - 2025-07-25
 
 ### Fixed

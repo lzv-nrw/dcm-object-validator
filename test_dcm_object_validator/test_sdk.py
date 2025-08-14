@@ -56,7 +56,7 @@ def test_default_ping(
 ):
     """Test default endpoint `/ping-GET`."""
 
-    run_service(app)
+    run_service(app, probing_path="ready")
 
     response = default_sdk.ping()
 
@@ -68,7 +68,7 @@ def test_default_status(
 ):
     """Test default endpoint `/status-GET`."""
 
-    run_service(app)
+    run_service(app, probing_path="ready")
 
     response = default_sdk.get_status()
 
@@ -81,7 +81,7 @@ def test_default_identify(
 ):
     """Test default endpoint `/identify-GET`."""
 
-    run_service(app)
+    run_service(app, probing_path="ready")
 
     response = default_sdk.identify()
 
@@ -109,7 +109,7 @@ def test_validation_report(
 ):
     """Test endpoints POST-/validate and GET-/report."""
 
-    run_service(app)
+    run_service(app, probing_path="ready")
     submission = validation_sdk.validate(
         {
             "validation": {
@@ -145,7 +145,7 @@ def test_validation_report_404(
 ):
     """Test validation endpoint `/report-GET` without previous submission."""
 
-    run_service(app)
+    run_service(app, probing_path="ready")
 
     with pytest.raises(dcm_object_validator_sdk.rest.ApiException) as exc_info:
         validation_sdk.get_report(token="some-token")

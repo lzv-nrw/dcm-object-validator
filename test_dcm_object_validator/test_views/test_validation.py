@@ -60,7 +60,7 @@ def _app(fixtures):
         ORCHESTRATION_ABORT_NOTIFICATIONS_STARTUP_INTERVAL = 0.01
 
     # create app using factory
-    app = app_factory(TestingConfig())
+    app = app_factory(TestingConfig(), block=True)
 
     return app
 
