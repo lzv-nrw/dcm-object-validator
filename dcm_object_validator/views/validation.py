@@ -4,7 +4,7 @@ Validation View-class definition
 
 from typing import Optional
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 from data_plumber_http.decorators import flask_handler, flask_args, flask_json
 from dcm_common import LoggingContext as Context
 from dcm_common.orchestration import Job, JobConfig
@@ -34,18 +34,28 @@ class ValidationView(services.OrchestratedView):
             json=flask_json,
         )
         def validate(
-            validation: ValidationConfig, callback_url: Optional[str] = None
+            validation: ValidationConfig,
+            token: Optional[str] = None,
+            callback_url: Optional[str] = None,
         ):
             """Submit for validation."""
-            token = self.orchestrator.submit(
-                JobConfig(
-                    request_body={
-                        "validation": validation.json,
-                        "callback_url": callback_url,
-                    },
-                    context=self.NAME,
+            try:
+                token = self.orchestrator.submit(
+                    JobConfig(
+                        request_body={
+                            "validation": validation.json,
+                            "callback_url": callback_url,
+                        },
+                        context=self.NAME,
+                    ),
+                    token=token,
                 )
-            )
+            except ValueError as exc_info:
+                return Response(
+                    f"Submission rejected: {exc_info}",
+                    mimetype="text/plain",
+                    status=400,
+                )
 
             return jsonify(token.json), 201
 

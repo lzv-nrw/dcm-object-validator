@@ -4,7 +4,7 @@ from typing import Mapping
 from pathlib import Path
 
 from data_plumber_http import Property, Object, Url
-from dcm_common.services.handlers import TargetPath, PluginType
+from dcm_common.services.handlers import TargetPath, PluginType, UUID
 
 from dcm_object_validator.models import ValidationConfig, Target
 from dcm_object_validator.plugins.validation import ValidationPlugin
@@ -39,9 +39,10 @@ def get_validate_handler(
                 },
                 accept_only=["target", "plugins"],
             ),
+            Property("token"): UUID(),
             Property("callbackUrl", name="callback_url"): Url(
                 schemes=["http", "https"]
             ),
         },
-        accept_only=["validation", "callbackUrl"],
+        accept_only=["validation", "token", "callbackUrl"],
     ).assemble()
