@@ -1,7 +1,8 @@
 from setuptools import setup
 
+
 setup(
-    version="5.2.0",
+    version="6.0.0",
     name="dcm-object-validator",
     description="flask app implementing the DCM Object Validator API",
     author="LZV.nrw",
@@ -11,8 +12,8 @@ setup(
         "flask==3.*",
         "PyYAML==6.*",
         "data-plumber-http>=1.0.0,<2",
-        "dcm-object-validator-api>=5.0.0,<6",
-        "dcm-common[services, db, orchestration]>=3.28.0,<4",
+        "dcm-object-validator-api>=6.0.0,<7",
+        "dcm-common[services, orchestra]>=4.0.0,<5",
     ],
     packages=[
         "dcm_object_validator",

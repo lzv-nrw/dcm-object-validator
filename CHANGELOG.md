@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.0.0] - 2025-09-09
+
+### Changed
+
+- **Breaking:** migrated to API v6
+
 ## [5.2.0] - 2025-08-20
 
 ### Added

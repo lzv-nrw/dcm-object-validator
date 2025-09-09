@@ -114,7 +114,10 @@ class ExternalPlugin(ValidationPlugin):
         # ... custom validation code here
         return result
 ```
-Note that plugin-constructors are called without arguments. If a plugin needs additional information in its constructor, the recommended way to handle this is to read that information from the environment instead.
+Note that plugin-constructors are called without arguments.
+If a plugin needs additional information in its constructor, the recommended way to handle this is to read that information from the environment instead.
+
+All plugins are currently required to support pickling of instances via the [`dill`](https://github.com/uqfoundation/dill)-library.
 
 ## Docker
 Build an image using, for example,

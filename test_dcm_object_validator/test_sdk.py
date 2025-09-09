@@ -8,25 +8,7 @@ import pytest
 import dcm_object_validator_sdk
 
 from dcm_object_validator import app_factory
-from dcm_object_validator.config import AppConfig
 from dcm_object_validator.plugins import IntegrityPlugin
-
-
-@pytest.fixture(name="testing_config")
-def _testing_config(file_storage):
-    """Returns test-config"""
-    # setup config-class
-    class TestingConfig(AppConfig):
-        VALIDATION_PLUGINS = [IntegrityPlugin]
-        ORCHESTRATION_DAEMON_INTERVAL = 0.001
-        ORCHESTRATION_ORCHESTRATOR_INTERVAL = 0.001
-        FS_MOUNT_POINT = file_storage
-    return TestingConfig
-
-
-@pytest.fixture(name="app")
-def _app(testing_config):
-    return app_factory(testing_config(), as_process=True)
 
 
 @pytest.fixture(name="default_sdk", scope="module")
@@ -52,11 +34,13 @@ def _validation_sdk():
 
 
 def test_default_ping(
-    default_sdk: dcm_object_validator_sdk.DefaultApi, app, run_service
+    default_sdk: dcm_object_validator_sdk.DefaultApi,
+    testing_config,
+    run_service,
 ):
     """Test default endpoint `/ping-GET`."""
 
-    run_service(app, probing_path="ready")
+    run_service(from_factory=lambda: app_factory(testing_config()), port=8080)
 
     response = default_sdk.ping()
 
@@ -64,11 +48,13 @@ def test_default_ping(
 
 
 def test_default_status(
-    default_sdk: dcm_object_validator_sdk.DefaultApi, app, run_service
+    default_sdk: dcm_object_validator_sdk.DefaultApi,
+    testing_config,
+    run_service,
 ):
     """Test default endpoint `/status-GET`."""
 
-    run_service(app, probing_path="ready")
+    run_service(from_factory=lambda: app_factory(testing_config()), port=8080)
 
     response = default_sdk.get_status()
 
@@ -76,12 +62,13 @@ def test_default_status(
 
 
 def test_default_identify(
-    default_sdk: dcm_object_validator_sdk.DefaultApi, app, run_service,
-    testing_config
+    default_sdk: dcm_object_validator_sdk.DefaultApi,
+    testing_config,
+    run_service,
 ):
     """Test default endpoint `/identify-GET`."""
 
-    run_service(app, probing_path="ready")
+    run_service(from_factory=lambda: app_factory(testing_config()), port=8080)
 
     response = default_sdk.identify()
 
@@ -97,6 +84,7 @@ def test_default_identify(
             del dict_["example"]
         for p in dict_.get("properties", {}).values():
             remove_nones(p)
+
     for plugin in response_dict["configuration"]["plugins"].values():
         remove_nones(plugin["signature"])
 
@@ -104,27 +92,25 @@ def test_default_identify(
 
 
 def test_validation_report(
-    validation_sdk: dcm_object_validator_sdk.ValidationApi, app, run_service,
-    object_good, object_good_md5
+    validation_sdk: dcm_object_validator_sdk.ValidationApi,
+    testing_config,
+    run_service,
+    object_good,
+    object_good_md5,
 ):
     """Test endpoints POST-/validate and GET-/report."""
 
-    run_service(app, probing_path="ready")
+    run_service(from_factory=lambda: app_factory(testing_config()), port=8080)
     submission = validation_sdk.validate(
         {
             "validation": {
-                "target": {
-                    "path": str(object_good)
-                },
+                "target": {"path": str(object_good)},
                 "plugins": {
                     "0": {
                         "plugin": IntegrityPlugin.name,
-                        "args": {
-                            "batch": False,
-                            "value": object_good_md5
-                        }
+                        "args": {"batch": False, "value": object_good_md5},
                     }
-                }
+                },
             }
         }
     )
@@ -141,11 +127,13 @@ def test_validation_report(
 
 
 def test_validation_report_404(
-    validation_sdk: dcm_object_validator_sdk.ValidationApi, app, run_service
+    validation_sdk: dcm_object_validator_sdk.ValidationApi,
+    testing_config,
+    run_service,
 ):
     """Test validation endpoint `/report-GET` without previous submission."""
 
-    run_service(app, probing_path="ready")
+    run_service(from_factory=lambda: app_factory(testing_config()), port=8080)
 
     with pytest.raises(dcm_object_validator_sdk.rest.ApiException) as exc_info:
         validation_sdk.get_report(token="some-token")

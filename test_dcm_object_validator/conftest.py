@@ -10,6 +10,10 @@ from dcm_common.services.tests import (
     run_service,
     wait_for_report,
 )
+from dcm_common.orchestra import dillignore
+
+from dcm_object_validator.config import AppConfig
+from dcm_object_validator.plugins import IntegrityPlugin
 
 
 @pytest.fixture(scope="session", name="fixtures")
@@ -32,6 +36,19 @@ def disable_extension_logging():
     from dcm_common.services.extensions.common import PrintStatusSettings
 
     PrintStatusSettings.silent = True
+
+
+@pytest.fixture(name="testing_config")
+def _testing_config(file_storage):
+    @dillignore("controller", "worker_pool")
+    class _AppConfig(AppConfig):
+        FS_MOUNT_POINT = file_storage
+        VALIDATION_PLUGINS = [IntegrityPlugin]
+        TESTING = True
+        ORCHESTRA_DAEMON_INTERVAL = 0.01
+        ORCHESTRA_WORKER_INTERVAL = 0.01
+        ORCHESTRA_WORKER_ARGS = {"messages_interval": 0.01}
+    return _AppConfig
 
 
 @pytest.fixture(name="object_good")

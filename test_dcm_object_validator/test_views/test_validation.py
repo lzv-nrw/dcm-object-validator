@@ -43,36 +43,20 @@ class _DemoPluginInvalid(DemoPlugin):
         return super().get(context, **kwargs)
 
 
-@pytest.fixture(name="app")
-def _app(fixtures):
+@pytest.fixture(name="testing_config_w_test_plugins")
+def _testing_config_w_test_plugins(testing_config):
     """Create instance of 'Object Validator'-app in TESTING-state."""
 
-    # setup config-class
-    class TestingConfig(AppConfig):
-        """Test config"""
-
+    class TestingConfig(testing_config):
         VALIDATION_PLUGINS = [_DemoPluginValid, _DemoPluginInvalid]
-        TESTING = True
-        FS_MOUNT_POINT = fixtures
-        ORCHESTRATION_AT_STARTUP = False
-        ORCHESTRATION_DAEMON_INTERVAL = 0.001
-        ORCHESTRATION_ORCHESTRATOR_INTERVAL = 0.001
-        ORCHESTRATION_ABORT_NOTIFICATIONS_STARTUP_INTERVAL = 0.01
 
-    # create app using factory
-    app = app_factory(TestingConfig(), block=True)
-
-    return app
+    return TestingConfig
 
 
-@pytest.fixture(name="client")
-def create_client(app):
-    """Create testing client."""
-    return app.test_client()
-
-
-def test_validate_minimal(client, object_good, wait_for_report):
+def test_validate_minimal(testing_config_w_test_plugins, object_good):
     """Minimal test for the POST-/validate-endpoint."""
+    app = app_factory(testing_config_w_test_plugins())
+    client = app.test_client()
 
     response = client.post(
         "/validate",
@@ -90,12 +74,10 @@ def test_validate_minimal(client, object_good, wait_for_report):
             }
         },
     )
-
     assert response.status_code == 201
-    assert client.put("/orchestration?until-idle", json={}).status_code == 200
 
-    # wait for job to finish
-    report = wait_for_report(client, response.json["value"])
+    app.extensions["orchestra"].stop(stop_on_idle=True)
+    report = client.get(f"/report?token={response.json['value']}").json
 
     assert report["data"]["success"]
     assert report["data"]["valid"]
@@ -103,10 +85,12 @@ def test_validate_minimal(client, object_good, wait_for_report):
     assert report["data"]["details"]["0"]["valid"]
 
 
-def test_validate_invalid(client, object_good, wait_for_report):
+def test_validate_invalid(testing_config_w_test_plugins, object_good):
     """
     Test behavior for the POST-/validate-endpoint mixed validity.
     """
+    app = app_factory(testing_config_w_test_plugins())
+    client = app.test_client()
 
     response = client.post(
         "/validate",
@@ -130,12 +114,10 @@ def test_validate_invalid(client, object_good, wait_for_report):
             }
         },
     )
-
     assert response.status_code == 201
-    assert client.put("/orchestration?until-idle", json={}).status_code == 200
 
-    # wait for job to finish
-    report = wait_for_report(client, response.json["value"])
+    app.extensions["orchestra"].stop(stop_on_idle=True)
+    report = client.get(f"/report?token={response.json['value']}").json
 
     assert report["data"]["success"]
     assert not report["data"]["valid"]
@@ -143,10 +125,12 @@ def test_validate_invalid(client, object_good, wait_for_report):
     assert len(report["log"][Context.ERROR.name]) == 2
 
 
-def test_validate_unsuccessful(client, object_good, wait_for_report):
+def test_validate_unsuccessful(testing_config_w_test_plugins, object_good):
     """
     Test behavior for the POST-/validate-endpoint for mixed success.
     """
+    app = app_factory(testing_config_w_test_plugins())
+    client = app.test_client()
 
     response = client.post(
         "/validate",
@@ -170,12 +154,10 @@ def test_validate_unsuccessful(client, object_good, wait_for_report):
             }
         },
     )
-
     assert response.status_code == 201
-    assert client.put("/orchestration?until-idle", json={}).status_code == 200
 
-    # wait for job to finish
-    report = wait_for_report(client, response.json["value"])
+    app.extensions["orchestra"].stop(stop_on_idle=True)
+    report = client.get(f"/report?token={response.json['value']}").json
 
     assert not report["data"]["success"]
     assert "valid" not in report["data"]
@@ -184,12 +166,14 @@ def test_validate_unsuccessful(client, object_good, wait_for_report):
 
 
 def test_validate_explicit_path_in_args(
-    client, object_good, object_bad, wait_for_report
+    testing_config_w_test_plugins, object_good, object_bad
 ):
     """
     Test behavior for the POST-/validate-endpoint when explicitly
     passing a path as plugin-arg.
     """
+    app = app_factory(testing_config_w_test_plugins())
+    client = app.test_client()
 
     response = client.post(
         "/validate",
@@ -209,17 +193,15 @@ def test_validate_explicit_path_in_args(
                             "path": str(object_bad),
                             "success": True,
                         },
-                    }
+                    },
                 },
             }
         },
     )
-
     assert response.status_code == 201
-    assert client.put("/orchestration?until-idle", json={}).status_code == 200
 
-    # wait for job to finish
-    report = wait_for_report(client, response.json["value"])
+    app.extensions["orchestra"].stop(stop_on_idle=True)
+    report = client.get(f"/report?token={response.json['value']}").json
 
     assert report["data"]["success"]
     assert str(object_good) in str(report["data"]["details"]["0"]["log"])
